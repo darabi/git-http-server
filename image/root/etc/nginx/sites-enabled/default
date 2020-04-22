@@ -1,0 +1,47 @@
+server {
+  server_name       _;
+  listen 8080         default_server;
+  listen [::]:8080    default_server;
+
+  location ~ ^.*\.git/objects/([0-9a-f]+/[0-9a-f]+|pack/pack-[0-9a-f]+.(pack|idx))$ {
+    root            /var/www/repo;
+  }
+
+  # location ~ ^.*\.git/(HEAD|info/refs|objects/info/.*|git-(upload|receive)-pack)$ {
+  location / {
+    autoindex on;
+
+    location /health {
+      add_header Content-Type text/plain;
+      return 200 'OK';
+    }
+  
+    location ~ /.*\.git(/.*|$) {
+
+      set_by_lua $git_remote_repo_prefix 'return os.getenv("GIT_REMOTE_REPO_PREFIX")';
+      set_by_lua $git_project_root 'return os.getenv("GIT_PROJECT_ROOT")';
+      set_by_lua $git_ssh_private_key 'return os.getenv("GIT_SSH_PRIVATE_KEY")';
+      set_by_lua $git_ssh_private_key_pass 'return os.getenv("GIT_SSH_PRIVATE_KEY_PASS")';
+
+      include         fastcgi_params;
+
+      # this is prepended to the name of the git repo
+      fastcgi_param   GIT_REMOTE_REPO_PREFIX $git_remote_repo_prefix;
+      # this is the directory, where the bare git repos are cloned (required by git-http-backend)
+      fastcgi_param   GIT_PROJECT_ROOT $git_project_root;
+      # if this var exists, git-http-backend serves all git repos in GIT_PROJECT_ROOL
+      fastcgi_param   GIT_HTTP_EXPORT_ALL "";
+      # private key file id_rsa encoded as base64
+      fastcgi_param   GIT_SSH_PRIVATE_KEY $git_ssh_private_key;
+      # private key file passphrase
+      fastcgi_param   GIT_SSH_PRIVATE_KEY_PASS $git_ssh_private_key_pass;
+
+      fastcgi_param   SCRIPT_FILENAME /usr/local/bin/serve-repo;
+      fastcgi_param   PATH_INFO $uri;
+      fastcgi_param   REMOTE_USER $remote_user;
+      fastcgi_pass    unix:/var/run/fcgiwrap.socket;
+
+      include fastcgi_params;
+    }
+  }
+}

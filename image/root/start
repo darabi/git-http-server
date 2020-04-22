@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -e
+
+function shut_down() {
+    echo "Shutting down"
+    service fcgiwrap stop
+    kill -KILL $pid_nginx 2>/dev/null
+}
+
+trap "shut_down" SIGKILL SIGTERM SIGHUP SIGINT
+
+# check_env_var variable_name exit_code message
+# if exit_code = 0, then exit is NOT called
+check_env_var () {
+    # echo check_env_var called with $# args. variable_name=$1 exit_code=$2 message=$3
+    if [ "x${!1}" = "x" ] ; then
+        if [ $# = 3 ] ; then
+            printf "\n$3\n\n"
+        else
+            printf "\n $1 is not defined! Define it e.g. with docker run -e $1=... \n\n"
+        fi
+        if [ $2 -ne 0 ] ; then
+            exit $2
+        fi
+    fi
+}
+
+
+check_env_var GIT_SSH_PRIVATE_KEY 0 "Environment variable GIT_SSH_PRIVATE_KEY is empty, will generate a new one!"
+
+# generate a password-less new ssh key
+if [ -z $GIT_SSH_PRIVATE_KEY ] ; then
+    cat /dev/zero | ssh-keygen -q -N "" -f ~/.ssh/id_rsa
+else
+    base64 -d <<<$GIT_SSH_PRIVATE_KEY > ~/.ssh/id_rsa
+    chmod go-rx ~/.ssh/id_rsa
+fi
+
+if ! whoami &> /dev/null; then
+  if [ -w /etc/passwd ]; then
+    echo "${USER_NAME:-default}:x:$(id -u):0:${USER_NAME:-default} user:${HOME}:/usr/sbin/nologin" >> /etc/passwd
+  fi
+fi
+
+# start fwcgi and remember its PID
+service fcgiwrap start
+
+pid_fcgi="$(cat /var/run/fcgiwrap.pid)"
+
+exec nginx -g "daemon off;" &
+pid_nginx=$!
+
+wait
