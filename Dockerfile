@@ -24,15 +24,15 @@ ADD image/root /
 
 RUN usermod --uid 10001 www-data &&\
     sed -i -e 's/^user www-data.*//g' /etc/nginx/nginx.conf &&\
-    chgrp www-data /run &&\
+    chown www-data:root /run &&\
     chmod g+w /run &&\
-    chown www-data /var/lib/nginx &&\
+    chown www-data:root /var/lib/nginx &&\
+    chmod g+w /var/lib/nginx &&\
     mkdir -p $GIT_PROJECT_ROOT && \
+    chown www-data:root $GIT_PROJECT_ROOT &&\
     mkdir /var/www/.ssh && \
-    chown www-data /var/www/.ssh && \
-    chmod 0700 /var/www/.ssh && \
-    chown www-data $GIT_PROJECT_ROOT &&\
-    chgrp -R 0 $GIT_PROJECT_ROOT && \
+    chown www-data:root /var/www/.ssh && \
+    chmod 0770 /var/www/.ssh && \
     rm /var/log/nginx/* &&\
     ln -s /dev/stdout /var/log/nginx/access.log &&\
     ln -s /dev/stderr /var/log/nginx/error.log &&\
