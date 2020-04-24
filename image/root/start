@@ -26,8 +26,6 @@ check_env_var () {
     fi
 }
 
-env
-
 check_env_var GIT_SSH_PRIVATE_KEY 0 "Environment variable GIT_SSH_PRIVATE_KEY is empty, will generate a new one!"
 
 if ! whoami &> /dev/null; then
@@ -37,20 +35,12 @@ if ! whoami &> /dev/null; then
   fi
 fi
 
-env
-
 # generate a password-less new ssh key
-if [ -z $GIT_SSH_PRIVATE_KEY ] ; then
+if [ -z "$GIT_SSH_PRIVATE_KEY" ] ; then
     cat /dev/zero | ssh-keygen -q -N "" -f ~/.ssh/id_rsa
 else
     base64 -d <<<$GIT_SSH_PRIVATE_KEY > ~/.ssh/id_rsa
     chmod go-rx ~/.ssh/id_rsa
-fi
-
-if ! whoami &> /dev/null; then
-  if [ -w /etc/passwd ]; then
-    echo "${USER_NAME:-default}:x:$(id -u):0:${USER_NAME:-default} user:${HOME}:/usr/sbin/nologin" >> /etc/passwd
-  fi
 fi
 
 # start fwcgi and remember its PID
