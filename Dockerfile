@@ -24,6 +24,7 @@ ADD image/root /
 
 RUN usermod --uid 10001 www-data &&\
     sed -i -e 's/^user www-data.*//g' /etc/nginx/nginx.conf &&\
+    chmod g+w /etc/passwd* &&\
     chown www-data:root /run &&\
     chmod g+w /run &&\
     chown www-data:root /var/lib/nginx &&\
@@ -46,5 +47,4 @@ RUN usermod --uid 10001 www-data &&\
 
 USER 10001
 
-ENTRYPOINT [ "/start" ]
-
+CMD [ "/start" ]
