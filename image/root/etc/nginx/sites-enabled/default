@@ -22,11 +22,15 @@ server {
       set_by_lua $git_project_root 'return os.getenv("GIT_PROJECT_ROOT")';
       set_by_lua $git_ssh_private_key 'return os.getenv("GIT_SSH_PRIVATE_KEY")';
       set_by_lua $git_ssh_private_key_pass 'return os.getenv("GIT_SSH_PRIVATE_KEY_PASS")';
+      set_by_lua $git_strip_suffix 'return os.getenv("GIT_STRIP_SUFFIX")';
 
       include         fastcgi_params;
 
       # this is prepended to the name of the git repo
       fastcgi_param   GIT_REMOTE_REPO_PREFIX $git_remote_repo_prefix;
+      # Microsoft Team Foundation Server doesn't allow .git as suffix
+      # (unless the repo was called 'blabla.git' explicitly
+      fastcgi_param   GIT_STRIP_SUFFIX $git_strip_suffix;
       # this is the directory, where the bare git repos are cloned (required by git-http-backend)
       fastcgi_param   GIT_PROJECT_ROOT $git_project_root;
       # if this var exists, git-http-backend serves all git repos in GIT_PROJECT_ROOL

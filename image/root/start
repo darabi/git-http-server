@@ -2,6 +2,8 @@
 
 set -e
 
+env
+
 function shut_down() {
     echo "Shutting down"
     service fcgiwrap stop

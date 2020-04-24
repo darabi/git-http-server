@@ -45,7 +45,8 @@ RUN usermod --uid 10001 www-data &&\
     env GIT_REMOTE_REPO_PREFIX; \
     env GIT_PROJECT_ROOT; \
     env GIT_SSH_PRIVATE_KEY; \
-    env GIT_SSH_PRIVATE_KEY_PASS;\n" \
+    env GIT_SSH_PRIVATE_KEY_PASS; \
+    env GIT_STRIP_SUFFIX;\n" \
       >> /etc/nginx/modules-enabled/my-env-vars.conf && \
     update-rc.d fcgiwrap enable
 
