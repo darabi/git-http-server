@@ -25,7 +25,7 @@ fi
 # insecure, but necessary at the moment
 export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
-if [ ! -d "$GIT_PROJECT_ROOT/$clone_name" ] ; then
+if [ ! -d "$GIT_PROJECT_ROOT/$repo" ] ; then
     ssh-agent bash -c "printf \"${GIT_SSH_PRIVATE_KEY_PASS}\n\" | ssh-add ~/.ssh/id_rsa; git clone --bare $GIT_REMOTE_REPO_PREFIX/$remote_name $GIT_PROJECT_ROOT/$repo"
     /usr/lib/git-core/git-http-backend
 else
