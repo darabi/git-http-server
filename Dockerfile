@@ -12,6 +12,10 @@ ENV GIT_SSH_PRIVATE_KEY_PASS ""
 # prepended to the name of the git repo which is being pulled e.g. 'myproject.git'
 ENV GIT_REMOTE_REPO_PREFIX git@github.com:example/
 
+# if yes or true, the .git suffix is removed when fetching from the remote repo
+# (needed for Microsoft Team Foundation Server's git implementation)
+ENV GIT_STRIP_SUFFIX no
+
 ENV GIT_PROJECT_ROOT /var/www/repo
 
 ENV USER_NAME www-data

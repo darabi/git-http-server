@@ -16,11 +16,17 @@ IFS='/' read -ra path <<< "$PATH_INFO"
 
 repo=${path[1]}
 
+remote_name=$repo
+
+if [[ $GIT_STRIP_SUFFIX =~ (y|Y|1|true).* ]] ; then
+    remote_name=$(basename $repo .git)
+fi
+
 # insecure, but necessary at the moment
 export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
-if [ ! -d $GIT_PROJECT_ROOT/$repo ] ; then
-    ssh-agent bash -c "printf \"${GIT_SSH_PRIVATE_KEY_PASS}\n\" | ssh-add ~/.ssh/id_rsa; git clone --bare $GIT_REMOTE_REPO_PREFIX/$repo $GIT_PROJECT_ROOT/$repo"
+if [ ! -d "$GIT_PROJECT_ROOT/$clone_name" ] ; then
+    ssh-agent bash -c "printf \"${GIT_SSH_PRIVATE_KEY_PASS}\n\" | ssh-add ~/.ssh/id_rsa; git clone --bare $GIT_REMOTE_REPO_PREFIX/$remote_name $GIT_PROJECT_ROOT/$repo"
     /usr/lib/git-core/git-http-backend
 else
     ssh-agent bash -c "printf \"${GIT_SSH_PRIVATE_KEY_PASS}\n\" | ssh-add ~/.ssh/id_rsa; git fetch -C $GIT_PROJECT_ROOT/$repo origin" > /dev/null
@@ -28,27 +34,3 @@ else
 fi
 
 exit $?
-
-# output_headers 200 OK
-
-# echo REPO is $repo
-
-# for i in "${path[@]}"; do
-#     echo "$i";
-# done
-
-# cat << EOF
-# <html>
-# <head><title>Bash script</title></head>
-# <body><pre>
-# <div align=center><h1>A BASH CGI index on third location with env variables</h1></div>
-# EOF
-
-# env
-
-# cat << EOF
-# </body>
-# </html>
-# EOF
-
-# exit 0
